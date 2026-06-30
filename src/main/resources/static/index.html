@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order to Cash — SAP CPI</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c2230;
+    --border: #2a3038;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #3b82f6;
+    --accent-hover: #2f6fe0;
+    --success: #2ea043;
+    --error: #f85149;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #15202e 0%, var(--bg) 55%);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    padding: 48px 16px;
+  }
+
+  .card {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 32px 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .flow {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .flow .chip {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    color: var(--text);
+  }
+  .flow .arrow { color: var(--accent); }
+
+  label {
+    display: block;
+    margin: 18px 0 6px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
+  }
+  select { appearance: none; cursor: pointer; }
+
+  .lines-head, .line {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 10px;
+  }
+  .lines-head {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 2px;
+  }
+  .line { margin-top: 8px; }
+
+  button {
+    margin-top: 26px;
+    width: 100%;
+    padding: 12px 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  button:hover { background: var(--accent-hover); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: 0.6; cursor: default; }
+
+  .resp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 34px 0 10px;
+  }
+  .resp-head h3 { margin: 0; font-size: 0.95rem; }
+  .pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .pill.success { color: var(--success); border-color: rgba(46,160,67,0.4); background: rgba(46,160,67,0.1); }
+  .pill.error   { color: var(--error);   border-color: rgba(248,81,73,0.4);  background: rgba(248,81,73,0.1); }
+
+  pre {
+    background: #0b0e13;
+    border: 1px solid var(--border);
+    color: #c9d1d9;
+    padding: 16px;
+    border-radius: var(--radius);
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "SF Mono", "JetBrains Mono", Consolas, "Liberation Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+    min-height: 60px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Submit an Order</h1>
+    <div class="flow">
+      <span class="chip">Browser</span><span class="arrow">→</span>
+      <span class="chip">Spring Boot</span><span class="arrow">→</span>
+      <span class="chip">SAP Integration Suite</span><span class="arrow">→</span>
+      <span class="chip">Response</span>
+    </div>
+
+    <label for="po">PO Number</label>
+    <input id="po" value="PO12345"/>
+
+    <label for="region">Region</label>
+    <select id="region">
+      <option value="WEST">WEST</option>
+      <option value="EAST">EAST</option>
+    </select>
+
+    <label for="shipto">Ship To</label>
+    <input id="shipto" value="WH-WEST"/>
+
+    <label>Line Items</label>
+    <div class="lines-head"><span>SKU</span><span>Qty</span><span>Price</span></div>
+    <div class="line">
+      <input id="sku1" value="WIDGET-A"/>
+      <input id="qty1" type="number" value="100"/>
+      <input id="price1" type="number" step="0.01" value="2.50"/>
+    </div>
+    <div class="line">
+      <input id="sku2" value="WIDGET-B"/>
+      <input id="qty2" type="number" value="50"/>
+      <input id="price2" type="number" step="0.01" value="5.75"/>
+    </div>
+
+    <button id="submitBtn" onclick="submitOrder()">Send to SAP</button>
+
+    <div class="resp-head">
+      <h3>Response from CPI</h3>
+      <span id="status" class="pill">idle</span>
+    </div>
+    <pre id="out">Awaiting submission…</pre>
+  </div>
+
+<script>
+async function submitOrder() {
+  const out = document.getElementById('out');
+  const status = document.getElementById('status');
+  const btn = document.getElementById('submitBtn');
+
+  btn.disabled = true;
+  status.className = 'pill';
+  status.textContent = 'sending…';
+  out.textContent = 'Sending…';
+
+  const body = {
+    poNumber: document.getElementById('po').value,
+    region:   document.getElementById('region').value,
+    shipTo:   document.getElementById('shipto').value,
+    lines: [
+      { sku: document.getElementById('sku1').value, qty: +document.getElementById('qty1').value, price: +document.getElementById('price1').value },
+      { sku: document.getElementById('sku2').value, qty: +document.getElementById('qty2').value, price: +document.getElementById('price2').value }
+    ]
+  };
+
+  try {
+    const resp = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const text = await resp.text();
+    if (resp.ok) {
+      status.className = 'pill success';
+      status.textContent = resp.status + ' OK';
+      out.textContent = text;
+    } else {
+      status.className = 'pill error';
+      status.textContent = 'HTTP ' + resp.status;
+      out.textContent = text;
+    }
+  } catch (e) {
+    status.className = 'pill error';
+    status.textContent = 'error';
+    out.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

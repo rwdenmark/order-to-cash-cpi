@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Order">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="PoNumber" type="xs:string"/>
+        <xs:element name="Region" type="xs:string"/>
+        <xs:element name="ShipTo" type="xs:string"/>
+        <xs:element name="Lines">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Line" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Num" type="xs:string"/>
+                    <xs:element name="Sku" type="xs:string"/>
+                    <xs:element name="Qty" type="xs:decimal"/>
+                    <xs:element name="Price" type="xs:decimal"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

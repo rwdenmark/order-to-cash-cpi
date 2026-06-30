@@ -1,0 +1,9 @@
+<Order>
+  <PoNumber>PO12345</PoNumber>
+  <Region>WEST</Region>
+  <ShipTo>WH-WEST</ShipTo>
+  <Lines>
+    <Line><Num>1</Num><Sku>WIDGET-A</Sku><Qty>100</Qty><Price>2.50</Price></Line>
+    <Line><Num>2</Num><Sku>WIDGET-B</Sku><Qty>50</Qty><Price>5.75</Price></Line>
+  </Lines>
+</Order>

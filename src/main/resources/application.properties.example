@@ -1,0 +1,11 @@
+server.port=8080
+
+# ---- SAP Integration Suite (CPI) connection ----
+# Copy this file to application.properties and fill in the values from your
+# Process Integration Runtime service key. application.properties is gitignored
+# so your real credentials are never committed.
+
+cpi.token-url=https://<tenant>.authentication.<region>.hana.ondemand.com/oauth/token
+cpi.client-id=<your-client-id>
+cpi.client-secret=<your-client-secret>
+cpi.iflow-url=https://<tenant>.it-cpitrial0X-rt.cfapps.<region>.hana.ondemand.com/http/orders

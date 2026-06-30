@@ -1,0 +1,21 @@
+# --- Secrets (contains live SAP client credentials) ---
+src/main/resources/application.properties
+application-local.properties
+
+# --- Maven ---
+target/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- IntelliJ ---
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# --- OS / misc ---
+.DS_Store
+Thumbs.db
+*.log
