@@ -13,7 +13,7 @@ interface Capture {
 }
 const recent: Capture[] = [];
 
-app.post("/warehouse/:region", (req: Request, res: Response) => {
+app.post("/:region", (req: Request, res: Response) => {
   // optional: require a shared secret header if WAREHOUSE_SECRET is set
   if (SECRET && req.header("X-Shared-Secret") !== SECRET) {
     return res.status(401).send("unauthorized");
@@ -34,6 +34,6 @@ app.post("/warehouse/:region", (req: Request, res: Response) => {
 });
 
 // quick way to view the last captured orders in a browser
-app.get("/warehouse/log", (_req: Request, res: Response) => res.json(recent));
+app.get("/log", (_req: Request, res: Response) => res.json(recent));
 
 app.listen(PORT, () => console.log(`warehouse receiver listening on :${PORT}`));
