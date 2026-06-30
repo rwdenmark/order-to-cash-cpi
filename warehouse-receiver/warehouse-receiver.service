@@ -1,0 +1,15 @@
+[Unit]
+Description=Warehouse receiver (SAP CPI order-to-cash demo)
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/warehouse-receiver
+ExecStart=/usr/bin/node /opt/warehouse-receiver/dist/server.js
+Environment=PORT=8090
+# Uncomment and set to require a shared secret header from CPI:
+# Environment=WAREHOUSE_SECRET=change-me
+Restart=always
+User=ryan
+
+[Install]
+WantedBy=multi-user.target

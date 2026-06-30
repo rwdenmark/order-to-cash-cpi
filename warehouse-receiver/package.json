@@ -1,0 +1,19 @@
+{
+  "name": "warehouse-receiver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny receiver for the SAP CPI order-to-cash demo. Captures POSTed orders per region.",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.3"
+  }
+}
