@@ -2,9 +2,11 @@ package com.ryan.ordertocash;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -27,9 +29,17 @@ public class CpiClient {
     @Value("${cpi.client-secret}") private String clientSecret;
     @Value("${cpi.iflow-url}")     private String iflowUrl;
 
-    private final RestTemplate rest = new RestTemplate();
+    private final RestTemplate rest;
     private String cachedToken;
     private Instant expiresAt = Instant.EPOCH;
+
+    public CpiClient() {
+        // a bare RestTemplate has no timeouts, so a hung CPI call would hang us too
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(30_000);
+        this.rest = new RestTemplate(factory);
+    }
 
     private synchronized String getToken() {
         if (cachedToken != null && Instant.now().isBefore(expiresAt)) {
@@ -60,6 +70,16 @@ public class CpiClient {
     }
 
     public String sendOrder(String orderXml) {
+        try {
+            return postOrder(orderXml);
+        } catch (HttpClientErrorException.Unauthorized e) {
+            // cached token may have been revoked early, drop it and retry once
+            clearToken();
+            return postOrder(orderXml);
+        }
+    }
+
+    private String postOrder(String orderXml) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getToken());
         headers.setContentType(MediaType.APPLICATION_XML);
@@ -67,5 +87,10 @@ public class CpiClient {
         ResponseEntity<String> resp =
                 rest.exchange(iflowUrl, HttpMethod.POST, new HttpEntity<>(orderXml, headers), String.class);
         return resp.getBody();
+    }
+
+    private synchronized void clearToken() {
+        cachedToken = null;
+        expiresAt = Instant.EPOCH;
     }
 }

@@ -3,6 +3,9 @@ import express, { Request, Response } from "express";
 const PORT = Number(process.env.PORT ?? 8090);
 const SECRET = process.env.WAREHOUSE_SECRET ?? ""; // optional shared secret
 
+// only regions the CPI Router actually routes to
+const REGIONS = new Set(["WEST", "EAST"]);
+
 const app = express();
 app.use(express.text({ type: "*/*", limit: "1mb" }));
 
@@ -13,13 +16,21 @@ interface Capture {
 }
 const recent: Capture[] = [];
 
+// optional: require a shared secret header if WAREHOUSE_SECRET is set
+function authorized(req: Request): boolean {
+  return !SECRET || req.header("X-Shared-Secret") === SECRET;
+}
+
 app.post("/:region", (req: Request, res: Response) => {
-  // optional: require a shared secret header if WAREHOUSE_SECRET is set
-  if (SECRET && req.header("X-Shared-Secret") !== SECRET) {
+  if (!authorized(req)) {
     return res.status(401).send("unauthorized");
   }
 
   const region = req.params.region.toUpperCase();
+  if (!REGIONS.has(region)) {
+    return res.status(404).send("unknown region");
+  }
+
   const entry: Capture = {
     time: new Date().toISOString(),
     region,
@@ -34,6 +45,16 @@ app.post("/:region", (req: Request, res: Response) => {
 });
 
 // quick way to view the last captured orders in a browser
-app.get("/log", (_req: Request, res: Response) => res.json(recent));
+app.get("/log", (req: Request, res: Response) => {
+  if (!authorized(req)) {
+    return res.status(401).send("unauthorized");
+  }
+  res.json(recent);
+});
 
-app.listen(PORT, () => console.log(`warehouse receiver listening on :${PORT}`));
+// only listen when run directly so tests can import the app
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`warehouse receiver listening on :${PORT}`));
+}
+
+export default app;

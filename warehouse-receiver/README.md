@@ -8,8 +8,8 @@ It's self-hosted and exposed to the public internet (so SAP CPI's cloud runtime 
 
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/:region` | Receive an order for a region (e.g. `west`, `east`). Logs it and returns `received by <REGION>`. |
-| `GET` | `/log` | Returns the last 50 captured orders as JSON. |
+| `POST` | `/:region` | Receive an order for a known region (`west` or `east`, case-insensitive). Logs it and returns `received by <REGION>`. Anything else 404s. |
+| `GET` | `/log` | Returns the last 50 captured orders as JSON. Requires the same secret header as POST when `WAREHOUSE_SECRET` is set. |
 
 Public URLs through Tailscale Funnel look like `https://<machine>.<tailnet>.ts.net/warehouse/west`, which the funnel maps to `/west` here.
 
@@ -19,6 +19,7 @@ Public URLs through Tailscale Funnel look like `https://<machine>.<tailnet>.ts.n
 npm install
 npm run build          # tsc -> dist/server.js
 npm start              # node dist/server.js  (listens on :8090)
+npm test               # build + node --test (no extra deps)
 ```
 
 ## Configuration

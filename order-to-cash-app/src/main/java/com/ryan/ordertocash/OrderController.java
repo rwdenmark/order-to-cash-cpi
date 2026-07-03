@@ -1,8 +1,11 @@
 package com.ryan.ordertocash;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientResponseException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -23,17 +26,37 @@ public class OrderController {
         this.cpi = cpi;
     }
 
-    public record Line(String sku, int qty, double price) {}
+    public record Line(String sku, int qty, BigDecimal price) {}
 
     public record OrderRequest(String poNumber, String region, String shipTo, List<Line> lines) {}
 
     @PostMapping(value = "/orders", produces = MediaType.APPLICATION_XML_VALUE)
-    public String submit(@RequestBody OrderRequest req) {
+    public ResponseEntity<String> submit(@RequestBody OrderRequest req) {
+        if (req.poNumber() == null || req.poNumber().isBlank()) {
+            return ResponseEntity.badRequest().body("poNumber is required");
+        }
+        if (req.lines() != null) {
+            for (Line l : req.lines()) {
+                if (l.qty() <= 0) {
+                    return ResponseEntity.badRequest().body("line qty must be greater than zero");
+                }
+                if (l.price() != null && l.price().signum() < 0) {
+                    return ResponseEntity.badRequest().body("line price cannot be negative");
+                }
+            }
+        }
+
         String orderXml = toOrderXml(req);
-        return cpi.sendOrder(orderXml);
+        try {
+            return ResponseEntity.ok(cpi.sendOrder(orderXml));
+        } catch (RestClientResponseException e) {
+            // pass the CPI error through so the browser sees what went wrong
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 
-    private String toOrderXml(OrderRequest r) {
+    // package-private so the unit tests can hit it directly
+    String toOrderXml(OrderRequest r) {
         StringBuilder sb = new StringBuilder();
         sb.append("<Order>");
         sb.append("<PoNumber>").append(esc(r.poNumber())).append("</PoNumber>");
@@ -47,7 +70,7 @@ public class OrderController {
                   .append("<Num>").append(n++).append("</Num>")
                   .append("<Sku>").append(esc(l.sku())).append("</Sku>")
                   .append("<Qty>").append(l.qty()).append("</Qty>")
-                  .append("<Price>").append(l.price()).append("</Price>")
+                  .append("<Price>").append(l.price() == null ? "" : l.price().toPlainString()).append("</Price>")
                   .append("</Line>");
             }
         }
