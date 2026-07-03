@@ -30,14 +30,14 @@ npm start              # node dist/server.js  (listens on :8090)
 
 ## Deploy (systemd)
 
-Run it as a service with the included `warehouse-receiver.service` unit (adjust `WorkingDirectory`, `ExecStart`, and `User` to your paths), then expose it:
+Run it as a service with the included `warehouse-receiver.service` unit (adjust `WorkingDirectory`, `ExecStart`, and `User` to your paths), then expose it.
 
 ```bash
 sudo systemctl enable --now warehouse-receiver
-sudo tailscale funnel --bg --set-path=/warehouse 8090
+tailscale funnel --bg --set-path /warehouse localhost:8090
 ```
 
 ## Notes
 
-- WSL build note: use Linux-native Node inside WSL (the Windows Node on the PATH breaks native installs and `npm run`); if `npm run build` misbehaves, compile directly with `/usr/bin/node ./node_modules/typescript/bin/tsc`.
+- If building inside WSL, use Linux-native Node. The Windows Node on the PATH breaks native installs and `npm run`. If `npm run build` misbehaves, compile directly with `/usr/bin/node ./node_modules/typescript/bin/tsc`.
 - This is a demo receiver, not a production service.

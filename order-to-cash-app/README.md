@@ -20,11 +20,12 @@ order-to-cash-app/
 
 ## Run
 
-1. Build/deploy the CPI iFlow first (see `../order_to_cash_project_spec.md`), so you have
-   its endpoint URL.
+1. Build/deploy the CPI iFlow first, so you have its endpoint URL.
 2. Create a **Process Integration Runtime** service key in BTP (plan `integration-flow`,
    role `ESBMessaging.send`). Copy `tokenurl`, `clientid`, `clientsecret`.
-3. Fill those four values in `src/main/resources/application.properties`
+3. Copy `src/main/resources/application.properties.example` to
+   `src/main/resources/application.properties`, then fill in the three service-key
+   values plus the iFlow endpoint URL from step 1
    (`cpi.token-url`, `cpi.client-id`, `cpi.client-secret`, `cpi.iflow-url`).
 4. Run:
    ```
@@ -36,7 +37,7 @@ order-to-cash-app/
 ## Notes
 
 - Frontend is a single static HTML page (vanilla JS) so there's no separate build step.
-  Swap it for a React app later if you want — the backend API stays the same.
+  Swap it for a React app later if you want. The backend API stays the same.
 - Same-origin (page served by Spring Boot), so no CORS config needed.
 - The OAuth client secret stays server-side in `application.properties`. Do not move
   the SAP call into the browser.
