@@ -16,7 +16,7 @@ interface Capture {
 }
 const recent: Capture[] = [];
 
-// optional: require a shared secret header if WAREHOUSE_SECRET is set
+// require a shared secret header if WAREHOUSE_SECRET is set (optional)
 function authorized(req: Request): boolean {
   return !SECRET || req.header("X-Shared-Secret") === SECRET;
 }

@@ -41,4 +41,4 @@ tailscale funnel --bg --set-path /warehouse localhost:8090
 ## Notes
 
 - If building inside WSL, use Linux-native Node. The Windows Node on the PATH breaks native installs and `npm run`. If `npm run build` misbehaves, compile directly with `/usr/bin/node ./node_modules/typescript/bin/tsc`.
-- This is a demo receiver, not a production service.
+- Demo receiver only. Captured orders live in memory and are lost on restart.
