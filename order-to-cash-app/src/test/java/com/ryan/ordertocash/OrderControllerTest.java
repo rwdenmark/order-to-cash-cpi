@@ -2,6 +2,7 @@ package com.ryan.ordertocash;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.math.BigDecimal;
@@ -113,6 +114,30 @@ class OrderControllerTest {
     }
 
     @Test
+    void nullPriceIs400() {
+        var req = new OrderController.OrderRequest(
+                "PO-1", "WEST", "Dock 4", List.of(line("SKU-1", 1, null)));
+        var resp = controller.submit(req);
+        assertEquals(400, resp.getStatusCode().value());
+    }
+
+    @Test
+    void unknownRegionIs400() {
+        var req = new OrderController.OrderRequest(
+                "PO-1", "NORTH", "Dock 4", List.of(line("SKU-1", 1, new BigDecimal("2.50"))));
+        var resp = controller.submit(req);
+        assertEquals(400, resp.getStatusCode().value());
+    }
+
+    @Test
+    void missingRegionIs400() {
+        var req = new OrderController.OrderRequest(
+                "PO-1", null, "Dock 4", List.of(line("SKU-1", 1, new BigDecimal("2.50"))));
+        var resp = controller.submit(req);
+        assertEquals(400, resp.getStatusCode().value());
+    }
+
+    @Test
     void validOrderGoesToCpiAndReturnsFulfillment() {
         var req = new OrderController.OrderRequest(
                 "PO-1", "WEST", "Dock 4", List.of(line("SKU-1", 2, new BigDecimal("9.99"))));
@@ -137,5 +162,20 @@ class OrderControllerTest {
         var resp = ctrl.submit(req);
         assertEquals(422, resp.getStatusCode().value());
         assertEquals("cpi says no", resp.getBody());
+    }
+
+    @Test
+    void cpiTimeoutIs502WithCleanBody() {
+        StubCpi timingOut = new StubCpi() {
+            @Override public String sendOrder(String orderXml) {
+                throw new ResourceAccessException("I/O error on POST request: Read timed out");
+            }
+        };
+        var ctrl = new OrderController(timingOut);
+        var req = new OrderController.OrderRequest(
+                "PO-1", "WEST", "Dock 4", List.of(line("SKU-1", 1, new BigDecimal("2.50"))));
+        var resp = ctrl.submit(req);
+        assertEquals(502, resp.getStatusCode().value());
+        assertTrue(resp.getBody().startsWith("could not reach CPI"), resp.getBody());
     }
 }

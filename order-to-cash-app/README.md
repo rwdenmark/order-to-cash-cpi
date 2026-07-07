@@ -9,14 +9,20 @@ never sees the SAP credentials.
 ```
 order-to-cash-app/
 ├── pom.xml
+├── schemas/                          # Order/Fulfillment XSDs + sample order
 ├── src/main/java/com/ryan/ordertocash/
 │   ├── OrderToCashApplication.java   # entry point
 │   ├── OrderController.java          # POST /api/orders, builds Order XML
 │   └── CpiClient.java                # OAuth token + POST to iFlow
-└── src/main/resources/
-    ├── application.properties        # <-- fill in your CPI service-key values
-    └── static/index.html             # the web form (served at http://localhost:8080)
+├── src/main/resources/
+│   ├── application.properties.example   # copy to application.properties (gitignored)
+│   └── static/index.html             # the web form (served at http://localhost:8080)
+└── src/test/java/com/ryan/ordertocash/
+    ├── OrderControllerTest.java
+    └── CpiClientTest.java
 ```
+
+`schemas/` mirrors the XSDs in `cpi-package`. The `cpi-package` copy is canonical.
 
 ## Run
 
@@ -37,7 +43,6 @@ order-to-cash-app/
 ## Notes
 
 - Frontend is a single static HTML page (vanilla JS) so there's no separate build step.
-  Swap it for a React app later if you want. The backend API stays the same.
 - Same-origin (page served by Spring Boot), so no CORS config needed.
 - The OAuth client secret stays server-side in `application.properties`. Do not move
   the SAP call into the browser.

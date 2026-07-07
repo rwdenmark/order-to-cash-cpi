@@ -1,6 +1,7 @@
 package com.ryan.ordertocash;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,19 @@ public class CpiClient {
         this.rest = new RestTemplate(factory);
     }
 
+    /**
+     * BTP service keys give the token URL both with and without the
+     * /oauth/token suffix, and a trailing slash would otherwise produce
+     * .../oauth/token//oauth/token. Package-private for the unit tests.
+     */
+    static String normalizeTokenUrl(String configured) {
+        String base = configured;
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        return base.endsWith("/oauth/token") ? base : base + "/oauth/token";
+    }
+
     private synchronized String getToken() {
         if (cachedToken != null && Instant.now().isBefore(expiresAt)) {
             return cachedToken;
@@ -52,12 +66,13 @@ public class CpiClient {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "client_credentials");
 
-        String url = tokenUrl.endsWith("/oauth/token") ? tokenUrl : tokenUrl + "/oauth/token";
+        String url = normalizeTokenUrl(tokenUrl);
 
-        ResponseEntity<Map> resp =
-                rest.exchange(url, HttpMethod.POST, new HttpEntity<>(form, headers), Map.class);
+        ResponseEntity<Map<String, Object>> resp = rest.exchange(
+                url, HttpMethod.POST, new HttpEntity<>(form, headers),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
-        Map body = resp.getBody();
+        Map<String, Object> body = resp.getBody();
         if (body == null || body.get("access_token") == null) {
             throw new IllegalStateException("No access_token returned from " + url);
         }

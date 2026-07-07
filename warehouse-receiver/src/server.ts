@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { timingSafeEqual } from "node:crypto";
 
 const PORT = Number(process.env.PORT ?? 8090);
 const SECRET = process.env.WAREHOUSE_SECRET ?? ""; // optional shared secret
@@ -17,8 +18,12 @@ interface Capture {
 const recent: Capture[] = [];
 
 // require a shared secret header if WAREHOUSE_SECRET is set (optional)
+// constant-time compare so the secret can't be guessed byte by byte
 function authorized(req: Request): boolean {
-  return !SECRET || req.header("X-Shared-Secret") === SECRET;
+  if (!SECRET) return true;
+  const given = Buffer.from(req.header("X-Shared-Secret") ?? "");
+  const expected = Buffer.from(SECRET);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 app.post("/:region", (req: Request, res: Response) => {

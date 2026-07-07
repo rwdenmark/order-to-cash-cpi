@@ -29,21 +29,18 @@ The browser only ever talks to the Spring Boot backend. The SAP OAuth client sec
 | [`order-to-cash-app/`](order-to-cash-app/) | Spring Boot backend + static dark-mode web form. Builds the Order XML and calls the CPI iFlow with OAuth client-credentials. See its [README](order-to-cash-app/README.md). |
 | [`warehouse-receiver/`](warehouse-receiver/) | Small TypeScript/Express service that stands in for downstream "warehouse" systems. Self-hosted and exposed publicly via Tailscale Funnel so CPI can reach it. |
 | [`cpi-package/`](cpi-package/) | Export of the CPI package plus the extracted `OrderToCash` iFlow source (iFlow definition, Groovy script, XSDs, mappings) and a corrected XSLT. See its [README](cpi-package/README.md). |
+| [`graphical_map_practice/`](graphical_map_practice/) | XSDs and a sample input used to practice graphical message mapping in CPI. |
 
 The iFlow runs in SAP Integration Suite. The zip in `cpi-package/` is the copy that gets re-imported after a trial-tenant wipe.
 
 ## What it demonstrates (SAP CPI)
 
 - iFlows and the HTTPS sender adapter with OAuth-secured invocation
-- Message mapping, both graphical and the context model (`removeContexts` + `sum` to total line items), plus a Groovy variant
+- Message mapping, both graphical and the context model (`removeContexts` + `sum` to total line items). A Groovy version of the transform (`script1.groovy`) runs in the tenant flow, the committed export predates that change and a refreshed export is pending
 - An XSLT mapping step for the same Order to Fulfillment transform, with a corrected stylesheet in `cpi-package/OrderToCash_corrected/`
 - Content-based routing via a Router with Non-XML conditions on a captured property
 - HTTP receiver adapters calling an external, TLS-fronted endpoint
-- Monitoring and error handling in the CPI message-processing log
-
-## Tech stack
-
-Java, Spring Boot, SAP Integration Suite (CPI), TypeScript, Express, Tailscale Funnel.
+- Monitoring in the CPI message-processing log, plus an exception subprocess in the tenant flow (not yet in the committed export, refresh pending)
 
 ## Notes
 

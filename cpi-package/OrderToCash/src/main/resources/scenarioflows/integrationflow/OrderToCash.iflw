@@ -265,7 +265,7 @@
                 </ifl:property>
                 <ifl:property>
                     <key>httpAddressWithoutQuery</key>
-                    <value>https://rdenmark.savannah-luma.ts.net/warehouse/east/</value>
+                    <value>https://funnel-host.example.com/warehouse/east/</value>
                 </ifl:property>
                 <ifl:property>
                     <key>providerRelativeUrl</key>
@@ -445,7 +445,7 @@
                 </ifl:property>
                 <ifl:property>
                     <key>httpAddressWithoutQuery</key>
-                    <value>https://rdenmark.savannah-luma.ts.net/warehouse/west/</value>
+                    <value>https://funnel-host.example.com/warehouse/west/</value>
                 </ifl:property>
                 <ifl:property>
                     <key>providerRelativeUrl</key>

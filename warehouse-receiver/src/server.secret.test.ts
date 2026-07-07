@@ -44,3 +44,26 @@ test("secret required on POST and GET /log when WAREHOUSE_SECRET is set", async 
     close();
   }
 });
+
+test("wrong secrets are rejected, including a same-length one", async () => {
+  const { default: app } = await import("./server");
+  const { base, close } = await start(app);
+  try {
+    const wrong = await fetch(`${base}/west`, {
+      method: "POST",
+      body: "<Order/>",
+      headers: { "X-Shared-Secret": "wrong" },
+    });
+    assert.equal(wrong.status, 401);
+
+    // same length as test-secret, exercises the timingSafeEqual path
+    const sameLength = await fetch(`${base}/west`, {
+      method: "POST",
+      body: "<Order/>",
+      headers: { "X-Shared-Secret": "test-secreX" },
+    });
+    assert.equal(sameLength.status, 401);
+  } finally {
+    close();
+  }
+});

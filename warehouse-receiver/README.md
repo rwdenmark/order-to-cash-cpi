@@ -31,12 +31,7 @@ npm test               # build + node --test (no extra deps)
 
 ## Deploy (systemd)
 
-Run it as a service with the included `warehouse-receiver.service` unit (adjust `WorkingDirectory`, `ExecStart`, and `User` to your paths), then expose it.
-
-```bash
-sudo systemctl enable --now warehouse-receiver
-tailscale funnel --bg --set-path /warehouse localhost:8090
-```
+Run it as a service with the included `warehouse-receiver.service` unit (adjust `WorkingDirectory`, `ExecStart`, and `User` to your paths), then expose it. The exact start, verify, and stop commands live in [MANUAL_START.md](MANUAL_START.md).
 
 ## Notes
 

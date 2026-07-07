@@ -1,8 +1,10 @@
 package com.ryan.ordertocash;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.math.BigDecimal;
@@ -35,12 +37,21 @@ public class OrderController {
         if (req.poNumber() == null || req.poNumber().isBlank()) {
             return ResponseEntity.badRequest().body("poNumber is required");
         }
+        // the iFlow router falls back to EAST for anything it doesn't recognize,
+        // so reject unknown regions here instead of shipping them silently
+        if (!"EAST".equals(req.region()) && !"WEST".equals(req.region())) {
+            return ResponseEntity.badRequest().body("region must be EAST or WEST");
+        }
         if (req.lines() != null) {
             for (Line l : req.lines()) {
                 if (l.qty() <= 0) {
                     return ResponseEntity.badRequest().body("line qty must be greater than zero");
                 }
-                if (l.price() != null && l.price().signum() < 0) {
+                if (l.price() == null) {
+                    // an empty <Price/> breaks the xs:decimal mapping downstream
+                    return ResponseEntity.badRequest().body("line price is required");
+                }
+                if (l.price().signum() < 0) {
                     return ResponseEntity.badRequest().body("line price cannot be negative");
                 }
             }
@@ -52,6 +63,10 @@ public class OrderController {
         } catch (RestClientResponseException e) {
             // pass the CPI error through so the browser sees what went wrong
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (ResourceAccessException e) {
+            // connect or read timeout, CPI never answered
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body("could not reach CPI, " + e.getMessage());
         }
     }
 
